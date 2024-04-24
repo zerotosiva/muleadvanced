@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+	<localRepository>${user.home}/.m2/repository</localRepository>
+	<interactiveMode>true</interactiveMode>
+	<offline>false</offline>
+	
+	
+	<servers>
+	
+	
+		<server>
+			<id>anypoint-exchange-v3</id>
+			<username>REPLACE WITH YOUR ANYPOINT USERNAME</username>
+			<password>REPLACE WITH YOUR ANYPOINT PASSWORD</password>
+		</server>
+		
+	
+		
+		<!--
+		<server>
+			<id>anypoint-exchange-v3</id>
+			<username>~~~Client~~~</username> 
+			<password>fc760acce984463f98673069357937ca~?~3c30eb9d1c614D448309c3d8F66b31Ca</password>
+		</server>
+			-->
+	</servers>
+
+</settings>

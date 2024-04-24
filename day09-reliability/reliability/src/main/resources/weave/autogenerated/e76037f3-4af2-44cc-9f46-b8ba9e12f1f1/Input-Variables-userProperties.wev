@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_e76037f3_4af2_44cc_9f46_b8ba9e12f1f1_Input_Variables_userProperties = {|
+  targetQueue: String, 
+  retryCount: Number, 
+  retryDelayinSeconds: Number, 
+  maxRetryCount: Number, 
+  publishTime: DateTime
+|}
+

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="428a1b61-3154-479e-b4f1-2b287bdb1e96" >
+		<jms:active-mq-connection >
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" initialRedeliveryDelay="10000" redeliveryDelay="10000" maxRedelivery="5"/>
+		</jms:active-mq-connection>
+	</jms:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1d4e4d36-2479-4b8b-ad3c-0e57f89c63fa" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="0a4397b1-44b5-4ab2-b681-cf5679f619e9" >
+		<vm:queues >
+			<vm:queue queueName="aq"/>
+			<vm:queue queueName="adlq" queueType="PERSISTENT" />
+		</vm:queues>
+	</vm:config>
+	
+	
+		
+	
+	<global-property doc:name="Global Property" doc:id="2b51877e-bf78-4c17-bf6c-36680b680a23" name="myenv" value="dev" />
+	<flow name="redeliveriesFlow2" doc:id="598f6521-127d-40f0-b136-78107685578c" >
+		<vm:listener queueName="aq" doc:name="Listener" doc:id="c2c0fd53-cc05-454d-89fa-437130e819f4" config-ref="VM_Config" transactionalAction="ALWAYS_BEGIN">
+			<redelivery-policy maxRedeliveryCount="2"/>
+		</vm:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="38dd50bd-e27a-4459-b8bc-069459e26784" message="#['received' ++ payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="8e5c4fa0-14bf-4f2e-8c31-e42755603369" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+if(payload =='siva')
+dw::Runtime::fail('Just for testing')
+else
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="redeliveriesFlow1" doc:id="95ee07e7-419d-453c-a2b6-03196fdc7f5c" >
+		<http:listener doc:name="Listener" doc:id="613253c0-172c-4c16-a7d9-c95b6bebb5b3" config-ref="HTTP_Listener_config" path="/test"/>
+		<set-payload value="#[attributes.queryParams.data]" doc:name="Set Payload" doc:id="16eca6c6-e400-439c-8314-4477f01b38a9" />
+		<vm:publish doc:name="Publish" doc:id="10ecf8af-a7a8-430c-9cba-bd1efba48edc" config-ref="VM_Config" sendCorrelationId="ALWAYS" queueName="aq"/>
+	</flow>
+	<flow name="redeliveriesFlow" doc:id="4b9f3bed-5dd4-4ff6-9f2c-243a9a7644df" >
+		<jms:listener doc:name="On New Message" doc:id="48db24c0-ac18-4936-bef3-f8b514250543" config-ref="JMS_Config" destination="inq" ackMode="AUTO" numberOfConsumers="1" transactionalAction="ALWAYS_BEGIN">
+			<redelivery-policy maxRedeliveryCount="2" />
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+			<jms:response sendCorrelationId="ALWAYS" />
+		</jms:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="be01e84e-2aa4-40db-9f80-de0c3d2e9ad9" message="#['received ' ++ payload]"/>
+		<set-payload value="#[payload as String ++ 'Response']" doc:name="Set Payload" doc:id="577fe4af-9096-41fe-962d-af16b5a0d7d6" />
+		<jms:publish doc:name="Publish" doc:id="6b5deb4f-1f8f-4aa9-a893-8fb6ec23f0c7" config-ref="JMS_Config" destination="sivareplyq"/>
+		<ee:transform doc:name="Transform Message" doc:id="83313599-d35c-4fa5-a768-d32788265634" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+if(payload =='sivaResponse')
+dw::Runtime::fail('Just for testing')
+else
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ea8fbd2b-ebdb-401e-ac60-836532a70b8b</groupId>
+		<artifactId>parent-pom</artifactId>
+		<version>1.0.0</version>
+
+	</parent>
+
+	<groupId>ea8fbd2b-ebdb-401e-ac60-836532a70b8b</groupId>
+	<artifactId>restaurant-sapi</artifactId>
+	<version>1.0.0</version>
+	<packaging>mule-application</packaging>
+	<name>restaurant-sapi</name>
+
+	<description>This is my template</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<app.runtime>4.5.1</app.runtime>
+		<mule.maven.plugin.version>4.0.0</mule.maven.plugin.version>
+		<api.groupId>ea8fbd2b-ebdb-401e-ac60-836532a70b8b</api.groupId>
+		<api.artifactId>sw-restaurants-sapi</api.artifactId>
+		<api.version>1.0.3</api.version>
+		<cloudhub.application.name>restaurant-08032024</cloudhub.application.name>
+
+		<tags />
+		<categories>[]</categories>
+		<fields>[]</fields>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.mule.tools.maven</groupId>
+						<artifactId>mule-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<cloudHubDeployment>
+								<applicationName>${cloudhub.application.name}-dev</applicationName>
+
+								<environment>dev</environment>
+								<region>us-east-1</region>
+								<workers>1</workers>
+								<workerType>MICRO</workerType>
+								<properties>
+									<key1>value1dev</key1>
+									<key2>value2pdev</key2>
+								</properties>
+							</cloudHubDeployment>
+
+							<classifier>mule-application</classifier>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
+
+
+		<profile>
+			<id>prod</id>
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.mule.tools.maven</groupId>
+						<artifactId>mule-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<cloudHubDeployment>
+
+								<environment>prod</environment>
+								<region>us-east-1</region>
+								<workers>1</workers>
+								<workerType>MICRO</workerType>
+								<properties>
+									<key1>value1prod</key1>
+									<key2>value2prod</key2>
+								</properties>
+							</cloudHubDeployment>
+
+							<classifier>mule-application</classifier>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
+	</profiles>
+
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<resources>
+						<resource>
+							<directory>src/main/resources</directory>
+							<filtering>true</filtering>
+							<includes>
+								<include>properties.yaml</include>
+								<include>properties-*.yaml</include>
+							</includes>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.mule.tools.maven</groupId>
+				<artifactId>mule-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<cloudHubDeployment>
+						<uri>https://anypoint.mulesoft.com</uri>
+						<muleVersion>${app.runtime}</muleVersion>
+						<username>zerotosiva6</username>
+						<password>Learnmule$1</password>
+						<!-- <connectedAppClientId>0d93fcf0e1e7429f95fa19fbfa62b2d5</connectedAppClientId> 
+							<connectedAppClientSecret>72560Ff527f847C0bB0d31De1a78F761</connectedAppClientSecret> 
+							<connectedAppGrantType>client_credentials</connectedAppGrantType> -->
+						<applicationName>${cloudhub.application.name}</applicationName>
+						<environment>Sandbox</environment>
+						<region>us-east-1</region>
+						<workers>1</workers>
+						<workerType>MICRO</workerType>
+						<properties>
+							<key1>value1</key1>
+							<key2>value2</key2>
+						</properties>
+					</cloudHubDeployment>
+					<sharedLibraries>
+						<sharedLibrary>
+							<groupId>mysql</groupId>
+							<artifactId>mysql-connector-java</artifactId>
+						</sharedLibrary>
+					</sharedLibraries>
+					<classifier>mule-application</classifier>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.30</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>ea8fbd2b-ebdb-401e-ac60-836532a70b8b</groupId>
+			<artifactId>sw-restaurants-sapi</artifactId>
+			<version>1.0.3</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
+		</dependency>
+
+
+
+	</dependencies>
+
+</project>
