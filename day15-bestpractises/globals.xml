@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	
+		
+	
+	
+	<configuration-properties doc:name="Env Configuration properties" doc:id="0ee4205a-aa02-4505-a149-e5dfe08e2bf7" file="properties-${env}.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="b046a689-f5d8-4bd6-82f6-85c96a1beca6" file="properties.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="4e5a59b7-e558-463e-a336-081ee231d0f7" file="properties-${env}-secure.yaml" key="mulesoft" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration doc:name="Configuration" doc:id="4ce7dfab-770a-4726-abcc-3d4c0fb2acb4" defaultErrorHandler-ref="globalsError_Handler" />
+	
+	
+	<global-property doc:name="Global Property" doc:id="481d5395-45e7-46e8-afe1-97118cb5fae8" name="env" value="prod" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b13c3f7a-21f0-49d7-a801-98b9dd419a9a" >
+		<db:my-sql-connection host="${db.host}" port="3306" user="${db.username}" password="${secure::db.password}" database="${db.name}" />
+	</db:config>
+	
+	
+	<error-handler name="globalsError_Handler" doc:id="af30beb4-00c9-4b98-95ec-b347ad455bfe" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9c20cccc-4182-4649-9d74-e40150e2206a" type="APP:DOESNOT_EXIST">
+			<ee:transform doc:name="Transform Message" doc:id="e1f1fc48-ece4-4bc0-93b4-10a7aa5a66a9" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+
+"status": "404",
+
+"message": vars.errormessage
+
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+"404"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="24f42380-a484-4c31-8d25-23cd2d4d8c1c" type="APP:DUPLICATE_ENTITY">
+			<ee:transform doc:name="Transform Message" doc:id="43c5d2b5-7676-4d6f-9dfe-36f13e649ab4" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+
+"status": "409",
+
+"message": vars.errormessage
+
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+"409"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8291d0dd-6d4c-4da4-83b0-cbabe9550b64" >
+			<ee:transform doc:name="Transform Message" doc:id="c80ed61b-9545-49bb-a1b1-3f2f5e488350">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+
+"status": "500",
+
+"message": "There was some server side problem. Please try later"
+
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+"500"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>

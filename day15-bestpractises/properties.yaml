@@ -1,0 +1,5 @@
+api:
+  groupId: "ea8fbd2b-ebdb-401e-ac60-836532a70b8b"
+  artifactId: "sw-restaurants-sapi"
+  version: "1.0.0"
+  spec: "resource::${api.groupId}:${api.artifactId}:${api.version}:raml:zip:sw-restaurants-sapi-raml.raml"
